@@ -7,12 +7,27 @@ from . import models
 from .database import engine
 #the path operations for patient and user from routers.py
 from .routers import patient, admin, auth, doctor
+#import CORS from middleware
+from fastapi.middleware.cors import CORSMiddleware
+
 
 #Create all the ORM models in the database 
 # models.Base.metadata.create_all(bind=engine)
 
 # create an instance of the fastapi class
 app = FastAPI()
+
+# add CORS middleware to allow cross-origin requests and HTTP requests from specific domains
+# set origins to allow all domains
+origins = ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
            
 #create welcome path operation
 @app.get("/")
