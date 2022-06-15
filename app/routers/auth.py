@@ -30,4 +30,21 @@ def login(admin_credentials: OAuth2PasswordRequestForm = Depends(), db:Session =
         "token_type":"bearer"
     }
     
-    
+#Create path operation for doctor login
+@router.post("/doctorlogin")
+def login(doctor_credentials: OAuth2PasswordRequestForm = Depends(), db:Session = Depends(get_db)):
+    doctor = db.query(models.Doctor).filter(models.Doctor.email == doctor_credentials.username).first()
+    if not doctor:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Invalid Credentials")
+        
+    if not utils.verify_password(doctor_credentials.password, doctor.password):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Invalid Credentials")
+        
+    #create access token
+    doctor_access_token = Oauth2.create_access_token(data = {"doctor_id": doctor.id})
+    return {
+        "access_token": doctor_access_token,
+        "token_type":"bearer"
+    }
