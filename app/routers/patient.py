@@ -26,9 +26,9 @@ allow_get_patients = RoleChecker(["admin"])
 @router.get("/", response_model=List[schemas.PatientResponse], dependencies=[Depends(allow_get_patients)])
 def get_patients(db: Session = Depends(get_db), current_user: int = Depends(Oauth2.get_current_user), 
                  limit: int = 5, skip: int = 0, search: Optional[str] = ""):
-    patient = db.query(models.Patient).all()
+    patients = db.query(models.Patient).all()
     print(current_user.role)
-    return patient
+    return patients
 
 #create path operation to get patient by id 
 @router.get("/{id}", response_model=schemas.PatientResponse, dependencies=[Depends(allow_get_patients)])
@@ -44,7 +44,7 @@ def get_patient(id: int , db: Session = Depends(get_db), current_user: int = Dep
 @router.post("/" , response_model=schemas.PatientResponse, status_code=status.HTTP_201_CREATED, dependencies=[Depends(allow_create_patient)])
 def create_patient(patient: schemas.PatientCreate, db: Session = Depends(get_db), current_user: int = Depends(Oauth2.get_current_user)):
     print(current_user.id)
-    new_patient = models.Patient(owner_id=current_user.id, **patient.dict())
+    new_patient = models.Patient(creator_id=current_user.id, **patient.dict())
     db.add(new_patient)
     db.commit()
     db.refresh(new_patient)
